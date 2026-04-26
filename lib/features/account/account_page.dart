@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../features/auth/auth_service.dart';
-import '../../features/auth/login_page.dart';
 import 'package:my_app/main.dart';
+import '../../widgets/app_refresh.dart';
 
 class AccountPage extends StatelessWidget {
   final VoidCallback? onBack;
   final Map<String, dynamic>? user;
+  final RefreshCallback? onRefresh;
 
   const AccountPage({
     super.key,
     this.onBack,
     this.user,
+    this.onRefresh,
   });
 
   String formatDate(String? date) {
@@ -31,6 +33,15 @@ class AccountPage extends StatelessWidget {
     return gender.toString();
   }
 
+  Future<void> _handleRefresh() async {
+    if (onRefresh != null) {
+      await onRefresh!();
+      return;
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+  }
+
   @override
   Widget build(BuildContext context) {
     if (user == null) {
@@ -43,169 +54,175 @@ class AccountPage extends StatelessWidget {
       body: Stack(
         children: [
           /// ================= CONTENT =================
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                /// HEADER + AVATAR
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      height: 180,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF00B14F), Color(0xFF00D68F)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+          AppRefresh(
+            onRefresh: _handleRefresh,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  /// HEADER + AVATAR
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        height: 180,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF00B14F), Color(0xFF00D68F)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      bottom: -50,
-                      child: CircleAvatar(
-                        radius: 55,
-                        backgroundColor: Colors.white,
-                        child: const CircleAvatar(
-                          radius: 50,
-                          backgroundImage:
-                              NetworkImage('https://i.pravatar.cc/300'),
+                      Positioned(
+                        bottom: -50,
+                        child: CircleAvatar(
+                          radius: 55,
+                          backgroundColor: Colors.white,
+                          child: const CircleAvatar(
+                            radius: 50,
+                            backgroundImage: NetworkImage(
+                                'https://via.placeholder.com/300x300'),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 60),
-
-                Text(
-                  user!['name'] ?? '',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    ],
                   ),
-                ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 60),
 
-                /// INFO CARD
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Card(
-                    color: Colors.white,
-                    surfaceTintColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide.none,
+                  Text(
+                    user!['name'] ?? '',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    elevation: 4,
-                    child: Column(
-                      children: [
-                        _InfoTile(
-                          icon: Icons.cake_outlined,
-                          title: 'Ngày sinh',
-                          value: formatDate(user?['birthday']),
-                          isFirst: true,
-                        ),
-                        Divider(height: 1),
-                        _InfoTile(
-                          icon: Icons.email_outlined,
-                          title: 'Email',
-                          value: user?['email'] ?? '',
-                        ),
-                        Divider(height: 1),
-                        _InfoTile(
-                          icon: Icons.email_outlined,
-                          title: 'Điện thoại',
-                          value: user?['phone'] ?? '',
-                        ),
-                        Divider(height: 1),
-                        _InfoTile(
-                          icon: Icons.person_outline,
-                          title: 'Giới tính',
-                          value: formatGender(user?['gender']),
-                        ),
-                        Divider(height: 1),
-                        _InfoTile(
-                          icon: Icons.location_on_outlined,
-                          title: 'Địa chỉ',
-                          value: user?['address'] ?? '',
-                          isLast: true,
-                        ),
-                        Divider(height: 1),
+                  ),
 
-                        /// LOGOUT
-                        ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                  const SizedBox(height: 20),
+
+                  /// INFO CARD
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Card(
+                      color: Colors.white,
+                      surfaceTintColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide.none,
+                      ),
+                      elevation: 4,
+                      child: Column(
+                        children: [
+                          _InfoTile(
+                            icon: Icons.cake_outlined,
+                            title: 'Ngày sinh',
+                            value: formatDate(user?['birthday']),
+                            isFirst: true,
                           ),
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.logout,
-                              color: Colors.red,
-                              size: 20,
-                            ),
+                          Divider(height: 1),
+                          _InfoTile(
+                            icon: Icons.email_outlined,
+                            title: 'Email',
+                            value: user?['email'] ?? '',
                           ),
-                          title: const Text(
-                            'Đăng xuất',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.red,
-                            ),
+                          Divider(height: 1),
+                          _InfoTile(
+                            icon: Icons.email_outlined,
+                            title: 'Điện thoại',
+                            value: user?['phone'] ?? '',
                           ),
-                          onTap: () async {
-                            final confirm = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Đăng xuất'),
-                                content: const Text(
-                                    'Bạn có chắc muốn đăng xuất không?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
-                                    child: const Text('Hủy'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
-                                    child: const Text(
-                                      'Đăng xuất',
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                  ),
-                                ],
+                          Divider(height: 1),
+                          _InfoTile(
+                            icon: Icons.person_outline,
+                            title: 'Giới tính',
+                            value: formatGender(user?['gender']),
+                          ),
+                          Divider(height: 1),
+                          _InfoTile(
+                            icon: Icons.location_on_outlined,
+                            title: 'Địa chỉ',
+                            value: user?['address'] ?? '',
+                            isLast: true,
+                          ),
+                          Divider(height: 1),
+
+                          /// LOGOUT
+                          ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            );
-
-                            if (confirm == true) {
-                              final auth = AuthService();
-
-                              await auth.logout(); // xóa token
-
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const RootPage(),
+                              child: const Icon(
+                                Icons.logout,
+                                color: Colors.red,
+                                size: 20,
+                              ),
+                            ),
+                            title: const Text(
+                              'Đăng xuất',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red,
+                              ),
+                            ),
+                            onTap: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Đăng xuất'),
+                                  content: const Text(
+                                      'Bạn có chắc muốn đăng xuất không?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                      child: const Text('Hủy'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                      child: const Text(
+                                        'Đăng xuất',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                (route) => false,
                               );
-                            }
-                          },
-                        ),
-                      ],
+
+                              if (confirm == true) {
+                                final auth = AuthService();
+
+                                await auth.logout(); // xóa token
+
+                                if (!context.mounted) return;
+
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const RootPage(),
+                                  ),
+                                  (route) => false,
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 30),
-              ],
+                  const SizedBox(height: 30),
+                ],
+              ),
             ),
           ),
 

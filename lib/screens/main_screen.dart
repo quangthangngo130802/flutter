@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
+
 import '../features/account/account_page.dart';
 import '../features/user/user_service.dart';
+import '../widgets/app_refresh.dart';
+import 'home_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -11,10 +13,10 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
+  final UserService _userService = UserService();
 
-  Map<String, dynamic>? user; // ✅ giữ user toàn app
-  late List<Widget> _pages;
+  int _currentIndex = 0;
+  Map<String, dynamic>? user;
 
   @override
   void initState() {
@@ -22,19 +24,44 @@ class _MainScreenState extends State<MainScreen> {
     loadUser();
   }
 
-  /// 👉 LOAD USER 1 LẦN
   Future<void> loadUser() async {
-    final data = await UserService().getMe();
+    final data = await _userService.getMe();
+    if (!mounted) return;
+
     setState(() {
       user = data;
+    });
+  }
 
-      /// 👉 init pages sau khi có user
-      _pages = [
-        HomePage(user: user), // nếu cần
-        _PlaceholderPage(title: 'Activity'),
-        _PlaceholderPage(title: 'Notification'),
+  Future<void> _refreshCurrentPage() async {
+    switch (_currentIndex) {
+      case 0:
+      case 3:
+        await loadUser();
+        break;
+      default:
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        if (!mounted) return;
+        setState(() {});
+    }
+  }
+
+  List<Widget> get _pages => [
+        HomePage(
+          user: user,
+          onRefresh: _refreshCurrentPage,
+        ),
+        _PlaceholderPage(
+          title: 'Activity',
+          onRefresh: _refreshCurrentPage,
+        ),
+        _PlaceholderPage(
+          title: 'Notification',
+          onRefresh: _refreshCurrentPage,
+        ),
         AccountPage(
-          user: user, // ✅ truyền user
+          user: user,
+          onRefresh: _refreshCurrentPage,
           onBack: () {
             setState(() {
               _currentIndex = 0;
@@ -42,12 +69,9 @@ class _MainScreenState extends State<MainScreen> {
           },
         ),
       ];
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    /// 👉 chưa có user thì loading
     if (user == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -139,21 +163,35 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-/// 👇 Placeholder
 class _PlaceholderPage extends StatelessWidget {
   final String title;
+  final Future<void> Function() onRefresh;
 
-  const _PlaceholderPage({required this.title});
+  const _PlaceholderPage({
+    required this.title,
+    required this.onRefresh,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
+    return AppRefresh(
+      onRefresh: onRefresh,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.sizeOf(context).height * 0.7,
+            child: Center(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
