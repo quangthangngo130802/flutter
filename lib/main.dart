@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/main_screen.dart';
+import 'features/auth/login_page.dart';
+import 'features/auth/auth_service.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -28,7 +30,36 @@ class XanhSMApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Roboto',
       ),
-      home: const MainScreen(),
+      home: const RootPage(), // 👈 đổi chỗ này
+    );
+  }
+}
+
+class RootPage extends StatelessWidget {
+  const RootPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final AuthService authService = AuthService();
+
+    return FutureBuilder<bool>(
+      future: authService.isLoggedIn(),
+      builder: (context, snapshot) {
+        // loading
+        if (!snapshot.hasData) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // đã login -> vào MainScreen
+        if (snapshot.data!) {
+          return const MainScreen();
+        }
+
+        // chưa login -> vào Login
+        return const LoginPage();
+      },
     );
   }
 }

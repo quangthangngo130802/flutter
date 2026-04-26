@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
+import '../features/account/account_page.dart';
+import '../features/user/user_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -11,22 +13,54 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
+  Map<String, dynamic>? user; // ✅ giữ user toàn app
+  late List<Widget> _pages;
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: _currentIndex == 0 ? const HomePage() : _buildPlaceholder(),
-      bottomNavigationBar: _buildBottomNav(),
-    );
+  void initState() {
+    super.initState();
+    loadUser();
   }
 
-  Widget _buildPlaceholder() {
-    final titles = ['Home', 'Activity', 'Notification', 'Account'];
-    return Center(
-      child: Text(
-        titles[_currentIndex],
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+  /// 👉 LOAD USER 1 LẦN
+  Future<void> loadUser() async {
+    final data = await UserService().getMe();
+    setState(() {
+      user = data;
+
+      /// 👉 init pages sau khi có user
+      _pages = [
+        HomePage(user: user), // nếu cần
+        _PlaceholderPage(title: 'Activity'),
+        _PlaceholderPage(title: 'Notification'),
+        AccountPage(
+          user: user, // ✅ truyền user
+          onBack: () {
+            setState(() {
+              _currentIndex = 0;
+            });
+          },
+        ),
+      ];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    /// 👉 chưa có user thì loading
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
       ),
+      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -61,11 +95,22 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isSelected = _currentIndex == index;
+
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () {
+        setState(() => _currentIndex = index);
+      },
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 6),
         width: 72,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFF00B14F).withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -88,6 +133,26 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 👇 Placeholder
+class _PlaceholderPage extends StatelessWidget {
+  final String title;
+
+  const _PlaceholderPage({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'bike_list_page.dart';
 class ServiceCategories extends StatelessWidget {
   const ServiceCategories({super.key});
 
@@ -41,6 +41,12 @@ class ServiceCategories extends StatelessWidget {
                       label: 'Bike',
                       color: const Color(0xFF00B14F),
                       bgColor: const Color(0xFFE8F5E9),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const BikeListPage()),
+                        );
+                      },
                     ),
                     _buildServiceItem(
                       icon: Icons.delivery_dining,
@@ -70,65 +76,67 @@ class ServiceCategories extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildServiceItem({
     required IconData icon,
     required String label,
     required Color color,
     required Color bgColor,
     String? badge,
+    VoidCallback? onTap, // 👈 thêm
   }) {
-    return Center(
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min, // 👈 FIX lệch hàng
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: bgColor,
-                  borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onTap: onTap,
+      child: Center(
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, color: color, size: 28),
                 ),
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF424242),
-                ),
-              ),
-            ],
-          ),
-
-          // 🔥 Badge HOT (fix vị trí)
-          if (badge != null)
-            Positioned(
-              top: -4,
-              right: -4,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF5252),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  badge,
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 8,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF424242),
+                  ),
+                ),
+              ],
+            ),
+
+            if (badge != null)
+              Positioned(
+                top: -4,
+                right: -4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF5252),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    badge,
+                    style: const TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

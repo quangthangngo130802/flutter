@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 
 class GreetingSection extends StatelessWidget {
-  const GreetingSection({super.key});
+  final Map<String, dynamic>? user;
+
+  const GreetingSection({super.key, this.user});
 
   @override
   Widget build(BuildContext context) {
+    if (user == null) {
+      return const SizedBox(); // 👈 không loading nữa
+    }
+
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Hello, NQ Thắng',
-            style: TextStyle(
+          Text(
+            "Hello, ${user!['name'] ?? ''}",
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
               color: Color(0xFF212121),
