@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
 
-import '../features/bike/bike.dart';
-import '../features/bike/bike_service.dart';
+import '../features/car/car.dart';
+import '../features/car/car_service.dart';
 
-class BikeListPage extends StatefulWidget {
-  const BikeListPage({super.key});
+class CarListPage extends StatefulWidget {
+  const CarListPage({super.key});
 
   @override
-  State<BikeListPage> createState() => _BikeListPageState();
+  State<CarListPage> createState() => _CarListPageState();
 }
 
-class _BikeListPageState extends State<BikeListPage> {
-  final BikeService _bikeService = BikeService();
+class _CarListPageState extends State<CarListPage> {
+  final CarService _carService = CarService();
 
   int selectedIndex = 0;
   double sheetSize = 0.55;
   bool _isLoading = false;
   String? _errorMessage;
-  List<Bike> bikes = [];
+  List<Car> cars = [];
 
   @override
   void initState() {
     super.initState();
-    _loadBikes();
+    _loadCars();
   }
 
-  Future<void> _loadBikes({bool showLoading = true}) async {
+  Future<void> _loadCars({bool showLoading = true}) async {
     if (showLoading) {
       setState(() {
         _isLoading = true;
@@ -34,14 +34,13 @@ class _BikeListPageState extends State<BikeListPage> {
     }
 
     try {
-      final data = await _bikeService.listBikes(perPage: 10);
+      final data = await _carService.listCars(perPage: 10);
       if (!mounted) return;
 
       setState(() {
-        bikes = data;
-        selectedIndex = bikes.isEmpty
-            ? 0
-            : selectedIndex.clamp(0, bikes.length - 1).toInt();
+        cars = data;
+        selectedIndex =
+            cars.isEmpty ? 0 : selectedIndex.clamp(0, cars.length - 1).toInt();
         _isLoading = false;
         _errorMessage = null;
       });
@@ -56,7 +55,7 @@ class _BikeListPageState extends State<BikeListPage> {
   }
 
   Future<void> _refreshData() async {
-    await _loadBikes(showLoading: false);
+    await _loadCars(showLoading: false);
   }
 
   @override
@@ -188,7 +187,7 @@ class _BikeListPageState extends State<BikeListPage> {
                           ),
 
                           const SizedBox(height: 12),
-                          _buildBikeContent(),
+                          _buildCarContent(),
                         ],
                       ),
                     ),
@@ -202,27 +201,27 @@ class _BikeListPageState extends State<BikeListPage> {
     );
   }
 
-  Widget _buildBikeContent() {
-    if (_isLoading && bikes.isEmpty) {
+  Widget _buildCarContent() {
+    if (_isLoading && cars.isEmpty) {
       return const SizedBox(
         height: 180,
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (_errorMessage != null && bikes.isEmpty) {
-      return _BikeMessage(
+    if (_errorMessage != null && cars.isEmpty) {
+      return _CarMessage(
         icon: Icons.error_outline,
         title: 'Không tải được danh sách xe',
         message: _errorMessage!,
         actionLabel: 'Thử lại',
-        onAction: () => _loadBikes(),
+        onAction: () => _loadCars(),
       );
     }
 
-    if (bikes.isEmpty) {
-      return const _BikeMessage(
-        icon: Icons.two_wheeler_outlined,
+    if (cars.isEmpty) {
+      return const _CarMessage(
+        icon: Icons.directions_car_filled,
         title: 'Chưa có xe',
         message: 'Danh sách đang trống.',
       );
@@ -230,8 +229,8 @@ class _BikeListPageState extends State<BikeListPage> {
 
     return Column(
       children: [
-        ...List.generate(bikes.length, (index) {
-          final item = bikes[index];
+        ...List.generate(cars.length, (index) {
+          final item = cars[index];
 
           return GestureDetector(
             onTap: () {
@@ -239,8 +238,8 @@ class _BikeListPageState extends State<BikeListPage> {
                 selectedIndex = index;
               });
             },
-            child: BikeItem(
-              bike: item,
+            child: CarItem(
+              car: item,
               selected: selectedIndex == index,
             ),
           );
@@ -249,11 +248,11 @@ class _BikeListPageState extends State<BikeListPage> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: bikes.isEmpty
+            onPressed: cars.isEmpty
                 ? null
                 : () {
-                    final selected = bikes[selectedIndex];
-                    debugPrint('Chọn bike: ${selected.name}');
+                    final selected = cars[selectedIndex];
+                    debugPrint('Chọn car: ${selected.name}');
                   },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF00B14F),
@@ -276,13 +275,13 @@ class _BikeListPageState extends State<BikeListPage> {
   }
 }
 
-class BikeItem extends StatelessWidget {
-  final Bike bike;
+class CarItem extends StatelessWidget {
+  final Car car;
   final bool selected;
 
-  const BikeItem({
+  const CarItem({
     super.key,
-    required this.bike,
+    required this.car,
     this.selected = false,
   });
 
@@ -302,30 +301,31 @@ class BikeItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.two_wheeler, size: 32, color: Colors.green),
+          const Icon(Icons.directions_car_filled,
+              size: 32, color: Colors.green),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  bike.name.isEmpty ? 'Unnamed bike' : bike.name,
+                  car.name.isEmpty ? 'Unnamed car' : car.name,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                if (bike.bikeType.isNotEmpty) ...[
+                if (car.carType.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    bike.bikeType,
+                    car.carType,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[700],
                     ),
                   ),
                 ],
-                if (bike.content.isNotEmpty) ...[
+                if (car.content.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    bike.content,
+                    car.content,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -339,7 +339,7 @@ class BikeItem extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            bike.formattedPrice,
+            car.formattedPrice,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ],
@@ -348,14 +348,14 @@ class BikeItem extends StatelessWidget {
   }
 }
 
-class _BikeMessage extends StatelessWidget {
+class _CarMessage extends StatelessWidget {
   final IconData icon;
   final String title;
   final String message;
   final String? actionLabel;
   final VoidCallback? onAction;
 
-  const _BikeMessage({
+  const _CarMessage({
     required this.icon,
     required this.title,
     required this.message,

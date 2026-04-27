@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'bike_list_page.dart';
+import 'car_list_page.dart';
+
 class ServiceCategories extends StatelessWidget {
   const ServiceCategories({super.key});
 
@@ -35,6 +37,13 @@ class ServiceCategories extends StatelessWidget {
                       label: 'Car',
                       color: const Color(0xFF00B14F),
                       bgColor: const Color(0xFFE8F5E9),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const CarListPage()),
+                        );
+                      },
                     ),
                     _buildServiceItem(
                       icon: Icons.two_wheeler,
@@ -44,7 +53,8 @@ class ServiceCategories extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const BikeListPage()),
+                          MaterialPageRoute(
+                              builder: (_) => const BikeListPage()),
                         );
                       },
                     ),
@@ -76,6 +86,7 @@ class ServiceCategories extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildServiceItem({
     required IconData icon,
     required String label,
@@ -114,13 +125,13 @@ class ServiceCategories extends StatelessWidget {
                 ),
               ],
             ),
-
             if (badge != null)
               Positioned(
                 top: -4,
                 right: -4,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFF5252),
                     borderRadius: BorderRadius.circular(8),
